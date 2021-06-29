@@ -48,7 +48,15 @@ class _FavouritesState extends State<Favourites> {
   getfavouritelist() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     setState(() {
-      favourite_list = prefs.getStringList("favourite_list")!;
+      if(prefs.getStringList("favourite_list") == null)
+        {
+          favourite_list = [];
+        }
+      else
+        {
+          favourite_list = prefs.getStringList("favourite_list")!;
+        }
+
     });
   }
 
@@ -63,6 +71,7 @@ class _FavouritesState extends State<Favourites> {
       appBar: AppBar(
         title: const Text("Favourite"),
         centerTitle: true,
+        backgroundColor: Colors.red,
       ),
       body: Container(child: _buildList()),
       resizeToAvoidBottomInset: false,

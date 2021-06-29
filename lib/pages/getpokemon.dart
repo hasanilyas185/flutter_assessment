@@ -1,5 +1,8 @@
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_assessment/blocs/authentication_bloc.dart';
+import 'package:flutter_assessment/events/authentication_event.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -16,22 +19,16 @@ class _GetPokemonState extends State<GetPokemon> {
   List<String> favourites = [];
   final dio = Dio();
 
-
   getlist() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     setState(() {
-      if(prefs.getStringList("favourite_list") == null)
-        {
-          favourites = [];
-        }
-      else
-        {
-          favourites = prefs.getStringList("favourite_list")!;
-        }
-
+      if (prefs.getStringList("favourite_list") == null) {
+        favourites = [];
+      } else {
+        favourites = prefs.getStringList("favourite_list")!;
+      }
     });
   }
-
 
   void _getpokemondata() async {
     if (!isLoading) {
@@ -93,21 +90,19 @@ class _GetPokemonState extends State<GetPokemon> {
         } else {
           return ListTile(
             title: Text((pokemons[index]['name'])),
-            trailing:
-            Consumer<Modifier>(
+            trailing: Consumer<Modifier>(
               builder: (context, modify, child) {
                 return IconButton(
                   icon: favourites.contains(pokemons[index]["name"])
                       ? const Icon(Icons.favorite, color: Colors.red)
-                      : const Icon(Icons.favorite,
-                      color: Colors.grey),
+                      : const Icon(Icons.favorite, color: Colors.grey),
                   onPressed: () async {
-                    SharedPreferences prefs = await SharedPreferences.getInstance();
+                    SharedPreferences prefs =
+                        await SharedPreferences.getInstance();
                     modify.changeIcon();
-                    if(!favourites.contains(pokemons[index]["name"]))
-                      {
-                        favourites.add(pokemons[index]["name"]);
-                      }
+                    if (!favourites.contains(pokemons[index]["name"])) {
+                      favourites.add(pokemons[index]["name"]);
+                    }
                     prefs.setStringList("favourite_list", favourites);
                   },
                 );
@@ -128,6 +123,16 @@ class _GetPokemonState extends State<GetPokemon> {
         appBar: AppBar(
           title: const Text("Pokemons"),
           centerTitle: true,
+          backgroundColor: Colors.red,
+          actions: [
+            IconButton(
+              onPressed: () {
+                BlocProvider.of<AuthenticationBloc>(context)
+                    .add(AuthenticationLoggedOut());
+              },
+              icon: const Icon(Icons.logout),
+            )
+          ],
         ),
         body: Container(
           child: _buildList(),
