@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:ui';
 import 'package:flutter/material.dart';
+import 'package:flutter_assessment/pages/login_screen.dart';
 import 'package:flutter_assessment/repositories/user_repository.dart';
 
 
@@ -13,7 +14,8 @@ class Landing extends StatefulWidget {
 }
 
 class Landing_State extends State<Landing> {
-  final UserRepository _userRepository = UserRepository();
+  final UserRepository userRepository = UserRepository();
+
   @override
   void initState() {
     startTime();
@@ -26,8 +28,11 @@ class Landing_State extends State<Landing> {
   }
 
   route() {
-
-
+    Navigator.push(context, MaterialPageRoute(builder: (_) {
+      return LoginScreen(
+        userRepository: userRepository,
+      );
+    }));
   }
 
   Widget _widget() {

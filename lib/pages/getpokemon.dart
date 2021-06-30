@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_assessment/blocs/authentication_bloc.dart';
 import 'package:flutter_assessment/events/authentication_event.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -12,7 +13,7 @@ class GetPokemon extends StatefulWidget {
 }
 
 class _GetPokemonState extends State<GetPokemon> {
-  String nextPage = "https://pokeapi.co/api/v2/pokemon/?limit=25";
+  String nextPage = "https://pokeapi.co/api/v2/pokemon/?limit=12";
   final ScrollController _scrollController = ScrollController();
   bool isLoading = false;
   List pokemons = [];
@@ -81,37 +82,73 @@ class _GetPokemonState extends State<GetPokemon> {
   }
 
   Widget _buildList() {
-    return ListView.builder(
-      //+1 for progressbar
-      itemCount: pokemons.length + 1,
-      itemBuilder: (BuildContext context, int index) {
-        if (index == pokemons.length) {
-          return _buildProgressIndicator();
-        } else {
-          return ListTile(
-            title: Text((pokemons[index]['name'])),
-            trailing: Consumer<Modifier>(
-              builder: (context, modify, child) {
-                return IconButton(
-                  icon: favourites.contains(pokemons[index]["name"])
-                      ? const Icon(Icons.favorite, color: Colors.red)
-                      : const Icon(Icons.favorite, color: Colors.grey),
-                  onPressed: () async {
-                    SharedPreferences prefs =
-                        await SharedPreferences.getInstance();
-                    modify.changeIcon();
-                    if (!favourites.contains(pokemons[index]["name"])) {
-                      favourites.add(pokemons[index]["name"]);
-                    }
-                    prefs.setStringList("favourite_list", favourites);
-                  },
-                );
-              },
-            ),
-          );
-        }
-      },
-      controller: _scrollController,
+    return Padding(
+      padding: const EdgeInsets.all(8.0),
+      child: StaggeredGridView.countBuilder(
+          controller: _scrollController,
+          crossAxisCount: 2,
+          crossAxisSpacing: 10,
+          mainAxisSpacing: 12,
+          itemCount: pokemons.length + 1,
+          itemBuilder: (context, index) {
+            if (index == pokemons.length) {
+              return _buildProgressIndicator();
+            } else {
+              return Container(
+                decoration: BoxDecoration(
+                    color: Colors.red,
+                    borderRadius: BorderRadius.all(Radius.circular(15))),
+                child: ClipRRect(
+                    borderRadius: BorderRadius.all(Radius.circular(15)),
+                    child: Column(
+                      children: [
+                        Image.asset(
+                          "assets/pikachu.png",
+                          width: 160,
+                        ),
+                        Padding(
+                          padding: const EdgeInsets.all(8.0),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                            children: [
+                              Text(
+                                (pokemons[index]['name']),
+                                style: TextStyle(color: Colors.white),
+                              ),
+                              Consumer<Modifier>(
+                                builder: (context, modify, child) {
+                                  return IconButton(
+                                    icon: favourites
+                                            .contains(pokemons[index]["name"])
+                                        ? const Icon(Icons.favorite,
+                                            color: Colors.yellow)
+                                        : const Icon(Icons.favorite,
+                                            color: Colors.white),
+                                    onPressed: () async {
+                                      SharedPreferences prefs =
+                                          await SharedPreferences.getInstance();
+                                      modify.changeIcon();
+                                      if (!favourites
+                                          .contains(pokemons[index]["name"])) {
+                                        favourites.add(pokemons[index]["name"]);
+                                      }
+                                      prefs.setStringList(
+                                          "favourite_list", favourites);
+                                    },
+                                  );
+                                },
+                              ),
+                            ],
+                          ),
+                        )
+                      ],
+                    )),
+              );
+            }
+          },
+          staggeredTileBuilder: (index) {
+            return StaggeredTile.count(1, index.isEven ? 1.2 : 1.8);
+          }),
     );
   }
 
@@ -126,7 +163,12 @@ class _GetPokemonState extends State<GetPokemon> {
           backgroundColor: Colors.red,
           actions: [
             IconButton(
-              onPressed: () {
+              onPressed: () async {
+                SharedPreferences prefs =
+                    await SharedPreferences.getInstance();
+                setState(() {
+                  prefs.clear();
+                });
                 BlocProvider.of<AuthenticationBloc>(context)
                     .add(AuthenticationLoggedOut());
               },

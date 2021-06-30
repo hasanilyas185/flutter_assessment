@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_assessment/blocs/register_bloc.dart';
 import 'package:flutter_assessment/pages/register_form.dart';
 import 'package:flutter_assessment/repositories/user_repository.dart';
-import 'package:flutter_assessment/widgets/curved_widget.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 class RegisterScreen extends StatelessWidget {
@@ -27,17 +26,13 @@ class RegisterScreen extends StatelessWidget {
         child: Container(
           height: double.infinity,
           decoration: BoxDecoration(
-            gradient: LinearGradient(
-              begin: Alignment.topCenter,
-              end: Alignment.bottomCenter,
-              colors: [Color(0xfff2cbd0), Color(0xfff4ced9)],
-            ),
+            color: Colors.white
           ),
           child: SingleChildScrollView(
             child: Stack(
               children: <Widget>[
                 Container(
-                  padding: const EdgeInsets.only(top: 100, left: 50),
+                  padding: const EdgeInsets.only(top: 100),
                   width: double.infinity,
                   height: 300,
                   decoration: BoxDecoration(
@@ -47,12 +42,33 @@ class RegisterScreen extends StatelessWidget {
                       colors: [Colors.white, Colors.white.withOpacity(0.4)],
                     ),
                   ),
-                  child: Text(
-                    'Register',
-                    style: TextStyle(
-                      fontSize: 40,
-                      color: Color(0xff6a515e),
-                    ),
+                  child: Column(
+                    children: [
+                      Padding(
+                        padding: const EdgeInsets.only(top: 42.0),
+                        child: Text(
+                          'Welcome',
+                          textAlign: TextAlign.center,
+                          style: TextStyle(
+                            fontSize: 30,
+                            fontWeight: FontWeight.w600,
+                            color: Colors.red,
+                          ),
+                        ),
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.only(top: 8.0),
+                        child: Text(
+                          'Sign up to your account',
+                          textAlign: TextAlign.center,
+                          style: TextStyle(
+                              fontSize: 20,
+                              fontWeight: FontWeight.w400,
+                              fontFamily: 'Mulish',
+                              color: Colors.grey),
+                        ),
+                      ),
+                    ],
                   ),
                 ),
                 Container(

@@ -11,7 +11,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 class LoginForm extends StatefulWidget {
   final UserRepository _userRepository;
 
-  const LoginForm({ required UserRepository userRepository})
+  const LoginForm({required UserRepository userRepository})
       : _userRepository = userRepository;
 
   @override
@@ -19,24 +19,18 @@ class LoginForm extends StatefulWidget {
 }
 
 class _LoginFormState extends State<LoginForm> {
+  bool passwordVisible = false;
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
-
-  bool get isPopulated =>
-      _emailController.text.isNotEmpty && _passwordController.text.isNotEmpty;
-
-  bool isButtonEnabled(LoginState state) {
-    return state.isFormValid && isPopulated && !state.isSubmitting;
-  }
+  GlobalKey<FormState> _formKey = GlobalKey<FormState>();
 
   late LoginBloc _loginBloc;
 
   @override
   void initState() {
     super.initState();
+    passwordVisible = true;
     _loginBloc = BlocProvider.of<LoginBloc>(context);
-    _emailController.addListener(_onEmailChange);
-    _passwordController.addListener(_onPasswordChange);
   }
 
   @override
@@ -54,11 +48,11 @@ class _LoginFormState extends State<LoginForm> {
                 content: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: <Widget>[
-                    Text('Login Failure'),
-                    Icon(Icons.error),
+                    Text('Login Failure',style: TextStyle(color: Colors.white),),
+                    Icon(Icons.error,color: Colors.white,),
                   ],
                 ),
-                backgroundColor: Color(0xffffae88),
+                backgroundColor: Colors.black,
               ),
             );
         }
@@ -71,13 +65,13 @@ class _LoginFormState extends State<LoginForm> {
                 content: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: <Widget>[
-                    Text('Logging In...'),
+                    Text('Logging In...',style: TextStyle(color: Colors.white),),
                     CircularProgressIndicator(
                       valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
                     )
                   ],
                 ),
-                backgroundColor: Color(0xffffae88),
+                backgroundColor:  Colors.black,
               ),
             );
         }
@@ -93,36 +87,104 @@ class _LoginFormState extends State<LoginForm> {
           return Padding(
             padding: const EdgeInsets.all(20.0),
             child: Form(
+              key: _formKey,
               child: Column(
                 children: <Widget>[
                   TextFormField(
                     controller: _emailController,
-                    decoration: InputDecoration(
-                      icon: Icon(Icons.email),
-                      labelText: "Email",
-                    ),
-                    keyboardType: TextInputType.emailAddress,
-                    autovalidate: true,
-                    autocorrect: false,
-                    validator: (_) {
-                      return !state.isEmailValid ? 'Invalid Email' : null;
+                    cursorColor: Colors.red,
+                    validator: (value) {
+                      if (value!.isEmpty) {
+                        return 'Please enter a valid email address or mobile no';
+                      }
+                      else if(!value.contains(RegExp(r"^[a-zA-Z0-9.a-zA-Z0-9.!#$%&'*+-/=?^_`{|}~]+@[a-zA-Z0-9]+\.[a-zA-Z]+")))
+                      {
+                        return 'Please enter a valid email address';
+                      }
+                      return null;
                     },
-                  ),
-                  TextFormField(
-                    controller: _passwordController,
                     decoration: InputDecoration(
-                      icon: Icon(Icons.lock),
-                      labelText: "Password",
+                      hintText: 'Enter Email or Mobile Number',
+                      contentPadding: const EdgeInsets.only(left: 24),
+                      hintStyle: TextStyle(
+                          fontSize: 14 * scalefactor,
+                          fontWeight: FontWeight.w400,
+                          fontFamily: 'Mulish',
+                          color: Colors.red),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(32),
+                        borderSide: const BorderSide(
+                            color: Colors.transparent, width: 2.0),
+                      ),
+                      focusedBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(32),
+                        borderSide:
+                            const BorderSide(color: Colors.red, width: 2.0),
+                      ),
+                      enabledBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(32),
+                        borderSide:
+                            const BorderSide(color: Colors.red, width: 2.0),
+                      ),
                     ),
-                    obscureText: true,
-                    autovalidate: true,
-                    autocorrect: false,
-                    validator: (_) {
-                      return !state.isPasswordValid ? 'Invalid Password' : null;
-                    },
                   ),
+                  Padding(
+                    padding: const EdgeInsets.only(top: 20.0),
+                    child: TextFormField(
+                      controller: _passwordController,
+                      obscureText: passwordVisible,
+                      cursorColor: Colors.red,
+                      validator: (value) {
+                        if (value!.isEmpty) {
+                          return 'Please enter a valid password';
+                        } else if (value.length < 7) {
+                          return 'Password must contains eight characters';
+                        }
+                        return null;
+                      },
+                      decoration: InputDecoration(
+                        suffixIcon: IconButton(
+                          icon: Icon(
+                            // Based on passwordVisible state choose the icon
+                            passwordVisible
+                                ? Icons.visibility_off
+                                : Icons.visibility,
+                            color: Colors.grey,
+                          ),
+                          onPressed: () {
+                            setState(() {
+                              passwordVisible = !passwordVisible;
+                            });
+                          },
+                        ),
+                        hintText: 'Password',
+                        contentPadding: const EdgeInsets.only(left: 24),
+                        hintStyle: TextStyle(
+                            fontSize: 14 * scalefactor,
+                            fontWeight: FontWeight.w400,
+                            fontFamily: 'Mulish',
+                            color: Colors.red),
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(32),
+                          borderSide: const BorderSide(
+                              color: Colors.transparent, width: 2.0),
+                        ),
+                        focusedBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(32),
+                          borderSide:
+                              const BorderSide(color: Colors.red, width: 2.0),
+                        ),
+                        enabledBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(32),
+                          borderSide:
+                              const BorderSide(color: Colors.red, width: 2.0),
+                        ),
+                      ),
+                    ),
+                  ),
+
                   SizedBox(
-                    height: 10,
+                    height: 20,
                   ),
                   ElevatedButton(
                     child: Container(
@@ -135,24 +197,35 @@ class _LoginFormState extends State<LoginForm> {
                       ),
                     ),
                     onPressed: () {
-                      if (isButtonEnabled(state)) {
+                      if (_formKey.currentState!.validate()) {
                         _onFormSubmitted();
                       }
                     },
                     style: ButtonStyle(
-                        shape: MaterialStateProperty.all<
-                            RoundedRectangleBorder>(RoundedRectangleBorder(
+                        shape:
+                            MaterialStateProperty.all<RoundedRectangleBorder>(
+                                RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(30.0),
                         )),
-                        backgroundColor:
-                        MaterialStateProperty.all(Colors.red),
+                        backgroundColor: MaterialStateProperty.all(Colors.red),
                         textStyle: MaterialStateProperty.all(TextStyle(
                             fontSize: 16 * scalefactor,
                             fontWeight: FontWeight.w700,
                             fontFamily: 'Mulish',
                             color: Colors.white))),
                   ),
-
+                  Padding(
+                    padding: const EdgeInsets.only(top: 16.0),
+                    child: Text(
+                      'Don’t have an account?',
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                          fontSize: 14 * scalefactor,
+                          fontWeight: FontWeight.w400,
+                          fontFamily: 'Mulish',
+                          color: Colors.grey),
+                    ),
+                  ),
                   SizedBox(
                     height: 10,
                   ),
@@ -168,24 +241,24 @@ class _LoginFormState extends State<LoginForm> {
                     ),
                     onPressed: () {
                       Navigator.push(context, MaterialPageRoute(builder: (_) {
-                        return RegisterScreen(userRepository: widget._userRepository,);
+                        return RegisterScreen(
+                          userRepository: widget._userRepository,
+                        );
                       }));
                     },
                     style: ButtonStyle(
-                        shape: MaterialStateProperty.all<
-                            RoundedRectangleBorder>(RoundedRectangleBorder(
+                        shape:
+                            MaterialStateProperty.all<RoundedRectangleBorder>(
+                                RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(30.0),
                         )),
-                        backgroundColor:
-                        MaterialStateProperty.all(Colors.red),
+                        backgroundColor: MaterialStateProperty.all(Colors.red),
                         textStyle: MaterialStateProperty.all(TextStyle(
                             fontSize: 16 * scalefactor,
                             fontWeight: FontWeight.w700,
                             fontFamily: 'Mulish',
                             color: Colors.white))),
                   ),
-
-
                 ],
               ),
             ),
@@ -200,14 +273,6 @@ class _LoginFormState extends State<LoginForm> {
     _emailController.dispose();
     _passwordController.dispose();
     super.dispose();
-  }
-
-  void _onEmailChange() {
-    _loginBloc.add(LoginEmailChange(email: _emailController.text));
-  }
-
-  void _onPasswordChange() {
-    _loginBloc.add(LoginPasswordChanged(password: _passwordController.text));
   }
 
   void _onFormSubmitted() {

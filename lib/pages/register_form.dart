@@ -12,24 +12,19 @@ class RegisterForm extends StatefulWidget {
 }
 
 class _LoginFormState extends State<RegisterForm> {
+  bool passwordVisible = false;
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
+  GlobalKey<FormState> _formKey = GlobalKey<FormState>();
 
-  bool get isPopulated =>
-      _emailController.text.isNotEmpty && _passwordController.text.isNotEmpty;
-
-  bool isButtonEnabled(RegisterState state) {
-    return state.isFormValid && isPopulated && !state.isSubmitting;
-  }
 
   late RegisterBloc _registerBloc;
 
   @override
   void initState() {
     super.initState();
+     passwordVisible = true;
     _registerBloc = BlocProvider.of<RegisterBloc>(context);
-    _emailController.addListener(_onEmailChange);
-    _passwordController.addListener(_onPasswordChange);
   }
 
   @override
@@ -47,11 +42,11 @@ class _LoginFormState extends State<RegisterForm> {
                 content: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: <Widget>[
-                    Text('Register Failure'),
+                    Text('Register Failure',style: TextStyle(color: Colors.white),),
                     Icon(Icons.error),
                   ],
                 ),
-                backgroundColor: Color(0xffffae88),
+                backgroundColor: Colors.black,
               ),
             );
         }
@@ -64,13 +59,13 @@ class _LoginFormState extends State<RegisterForm> {
                 content: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: <Widget>[
-                    Text('Registering...'),
+                    Text('Registering...',style: TextStyle(color: Colors.white),),
                     CircularProgressIndicator(
                       valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
                     )
                   ],
                 ),
-                backgroundColor: Color(0xffffae88),
+                backgroundColor: Colors.black,
               ),
             );
         }
@@ -87,33 +82,100 @@ class _LoginFormState extends State<RegisterForm> {
           return Padding(
             padding: const EdgeInsets.all(20.0),
             child: Form(
+              key: _formKey,
               child: Column(
                 children: <Widget>[
                   TextFormField(
                     controller: _emailController,
-                    decoration: InputDecoration(
-                      icon: Icon(Icons.email),
-                      labelText: "Email",
-                    ),
-                    keyboardType: TextInputType.emailAddress,
-                    autovalidate: true,
-                    autocorrect: false,
-                    validator: (_) {
-                      return !state.isEmailValid ? 'Invalid Email' : null;
+                    cursorColor: Colors.red,
+                    validator: (value) {
+                      if (value!.isEmpty) {
+                        return 'Please enter a valid email address or mobile no';
+                      }
+                      else if(!value.contains(RegExp(r"^[a-zA-Z0-9.a-zA-Z0-9.!#$%&'*+-/=?^_`{|}~]+@[a-zA-Z0-9]+\.[a-zA-Z]+")))
+                      {
+                        return 'Please enter a valid email address';
+                      }
+                      return null;
                     },
+                    decoration: InputDecoration(
+                      hintText: 'Enter Email or Mobile Number',
+                      contentPadding: const EdgeInsets.only(left: 24),
+                      hintStyle: TextStyle(
+                          fontSize: 14 * scalefactor,
+                          fontWeight: FontWeight.w400,
+                          fontFamily: 'Mulish',
+                          color: Colors.red),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(32),
+                        borderSide: const BorderSide(
+                            color: Colors.transparent, width: 2.0),
+                      ),
+                      focusedBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(32),
+                        borderSide:
+                        const BorderSide(color: Colors.red, width: 2.0),
+                      ),
+                      enabledBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(32),
+                        borderSide:
+                        const BorderSide(color: Colors.red, width: 2.0),
+                      ),
+                    ),
                   ),
-                  TextFormField(
-                    controller: _passwordController,
-                    decoration: InputDecoration(
-                      icon: Icon(Icons.lock),
-                      labelText: "Password",
+                  Padding(
+                    padding: const EdgeInsets.only(top: 20.0),
+                    child: TextFormField(
+                      controller: _passwordController,
+                      obscureText: passwordVisible,
+                      cursorColor: Colors.red,
+                      validator: (value) {
+                        if (value!.isEmpty) {
+                          return 'Please enter a valid password';
+                        } else if (value.length < 7) {
+                          return 'Password must contains eight characters';
+                        }
+                        return null;
+                      },
+                      decoration: InputDecoration(
+                        suffixIcon: IconButton(
+                          icon: Icon(
+                            // Based on passwordVisible state choose the icon
+                            passwordVisible
+                                ? Icons.visibility_off
+                                : Icons.visibility,
+                            color: Colors.grey,
+                          ),
+                          onPressed: () {
+                            setState(() {
+                              passwordVisible = !passwordVisible;
+                            });
+                          },
+                        ),
+                        hintText: 'Password',
+                        contentPadding: const EdgeInsets.only(left: 24),
+                        hintStyle: TextStyle(
+                            fontSize: 14 * scalefactor,
+                            fontWeight: FontWeight.w400,
+                            fontFamily: 'Mulish',
+                            color: Colors.red),
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(32),
+                          borderSide: const BorderSide(
+                              color: Colors.transparent, width: 2.0),
+                        ),
+                        focusedBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(32),
+                          borderSide:
+                          const BorderSide(color: Colors.red, width: 2.0),
+                        ),
+                        enabledBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(32),
+                          borderSide:
+                          const BorderSide(color: Colors.red, width: 2.0),
+                        ),
+                      ),
                     ),
-                    obscureText: true,
-                    autovalidate: true,
-                    autocorrect: false,
-                    validator: (_) {
-                      return !state.isPasswordValid ? 'Invalid Password' : null;
-                    },
                   ),
                   SizedBox(
                     height: 30,
@@ -129,7 +191,7 @@ class _LoginFormState extends State<RegisterForm> {
                       ),
                     ),
                     onPressed: () {
-                      if (isButtonEnabled(state)) {
+                      if (_formKey.currentState!.validate()) {
                         _onFormSubmitted();
                       }
                     },
@@ -156,15 +218,6 @@ class _LoginFormState extends State<RegisterForm> {
         },
       ),
     );
-  }
-
-  void _onEmailChange() {
-    _registerBloc.add(RegisterEmailChanged(email: _emailController.text));
-  }
-
-  void _onPasswordChange() {
-    _registerBloc
-        .add(RegisterPasswordChanged(password: _passwordController.text));
   }
 
   void _onFormSubmitted() {
